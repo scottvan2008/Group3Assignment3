@@ -1,183 +1,256 @@
-﻿
-
-using System;
-using System.CodeDom.Compiler;
+﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Security.Policy;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace Assignment_3_skeleton
+namespace Assignment3.Utility
 {
-    public class SLL : LinkedListADT
+    [DataContract]
+    [KnownType(typeof(Node))]
+    [KnownType(typeof(User))]
+    public class SLL : ILinkedListADT
     {
-		//two fields
-		Node head;
-		Node tail;
+        [DataMember] private Node head;
+        [DataMember] private int size;
 
-		//constructor
-		public SLL()
-		{
-			Head = Tail = null;
-		}
-		//getter and setter
-		public Node Head { get => head; set => head = value; }
-		public Node Tail { get => tail; set => tail = value; }
-
-        //Adds to the end of the list.
-        public void Append(object data)
+        public SLL()
         {
-			if (!IsEmpty())
-			{
-				tail.Successor = new Node(data);
-				tail = tail.Successor;
-			}
-			else
-			{
-				head = tail = new Node(data);
-			}
-		}
-		//clear all the nodes inside
-        public void Clear()
-        {
-            head = null; 
+            head = null;
+            size = 0;
         }
-        //Go through list and check if we have this object
-        public bool Contains(object data)
-        {
-			Node tempNode = head;
-			while (tempNode != null)
-			{
-				if (tempNode.Element.Equals(data))
-				{
-					return true;
-				}
-				tempNode = tempNode.Successor;
-			}
-			return false;
-		}
-        //Removes element at index from list
-        public void Delete(int index)
-        {
-            Node temp = head;
-            int x = 0;
-            do
-            {
-                if (index == 0)
-                {
-                    head = head.Successor;
-                    break;
-                }
-                else if (x == index - 1 && temp.Successor != null)
-                {
-                    temp.Successor = temp.Successor.Successor;
-                    break;
-                }
-                else
-                {
-					temp = temp.Successor;
-				}
-                x++;
-            } while (x < index && temp != null); 
-        }
-        //Gets the first index of element containing this data
-        public int IndexOf(object data)
-        {
-			int index = 0;
-			Node tempNode = head;
 
-			while (tempNode != null)
-			{
-				if (tempNode.Element.Equals(data))
-				{
-					return index;
-				}
-				index++;
-				tempNode = tempNode.Successor;
-			}
-
-			return -1;
-		}
-        //Adds a new element at a specific position
-        public void Insert(object data, int index)
-        {
-			Node preNode = head;
-			Node newNode = new Node(data);
-			if (index == 0)
-			{
-				newNode.Successor = head;
-				head = newNode;
-			}
-			else
-			{
-				for (int i = 0; i < index - 1; i++)
-				{
-					preNode = preNode.Successor;
-				}
-				Node aftNode = preNode.Successor;
-				newNode.Successor = aftNode;
-				preNode.Successor = newNode;
-			}
-		}
-        //Checks if the list is empty
         public bool IsEmpty()
         {
-			if (head == null)
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		}
-        //Prepends (adds to beginning) data to the list
-        public void Prepend(object data)
-        {
-			head = new Node(data, head);
-			if (tail == null) tail = head;
-		}
-        //Replaces the data  at index
-        public void Replace(object data, int index)
-        {
-			Node tempNode = head;
-			int count = 0;
-			while (tempNode != null)
-			{
-				if (count == index)
-				{
-					tempNode.Element = data;
-				}
-				count++;
-				tempNode = tempNode.Successor;
-			}
-		}
-        //Gets the data at the specified index
-        public object Retrieve(int index)
-        {
-            int x = 0;
-            Node temp = head;
-            while (x < index)
-            {
-                temp = temp.Successor;
-                x++;
-            }
-            return temp.Element;
+            return size == 0;
         }
-        //Gets the number of elements in the list
-        public int Size()
+
+        public void Clear()
         {
-			int size = 0;
-			Node current = head;
-			while (current != null)
-			{
-				size++;
-				current = current.Successor;
-			}
-			return size;
-		}
+            head = null;
+            size = 0;
+        }
+
+        public void AddLast(User value)
+        {
+            Node newNode = new Node(value);
+            if (IsEmpty())
+            {
+                head = newNode;
+            }
+            else
+            {
+                Node current = head;
+                while (current.Next != null)
+                {
+                    current = current.Next;
+                }
+                current.Next = newNode;
+            }
+            size++;
+        }
+
+        public void AddFirst(User value)
+        {
+            Node newNode = new Node(value)
+            {
+                Next = head
+            };
+            head = newNode;
+            size++;
+        }
+
+        public void Add(User value, int index)
+        {
+            if (index < 0 || index > size)
+            {
+                throw new IndexOutOfRangeException("Index is out of range.");
+            }
+
+            if (index == 0)
+            {
+                AddFirst(value);
+                return;
+            }
+
+            Node newNode = new Node(value);
+            Node current = head;
+            for (int i = 0; i < index - 1; i++)
+            {
+                current = current.Next;
+            }
+            newNode.Next = current.Next;
+            current.Next = newNode;
+            size++;
+        }
+
+        public void Replace(User value, int index)
+        {
+            if (index < 0 || index >= size)
+            {
+                throw new IndexOutOfRangeException("Index is out of range.");
+            }
+
+            Node current = head;
+            for (int i = 0; i < index; i++)
+            {
+                current = current.Next;
+            }
+            current.Value = value;
+        }
+
+        public int Count()
+        {
+            return size;
+        }
+
+        public void RemoveFirst()
+        {
+            if (IsEmpty())
+            {
+                throw new InvalidOperationException("List is empty.");
+            }
+            head = head.Next;
+            size--;
+        }
+
+        public void RemoveLast()
+        {
+            if (IsEmpty())
+            {
+                throw new InvalidOperationException("List is empty.");
+            }
+
+            if (size == 1)
+            {
+                head = null;
+            }
+            else
+            {
+                Node current = head;
+                while (current.Next.Next != null)
+                {
+                    current = current.Next;
+                }
+                current.Next = null;
+            }
+            size--;
+        }
+
+        public void Remove(int index)
+        {
+            if (index < 0 || index >= size)
+            {
+                throw new IndexOutOfRangeException("Index is out of range.");
+            }
+
+            if (index == 0)
+            {
+                RemoveFirst();
+                return;
+            }
+
+            Node current = head;
+            for (int i = 0; i < index - 1; i++)
+            {
+                current = current.Next;
+            }
+            current.Next = current.Next.Next;
+            size--;
+        }
+
+        public User GetValue(int index)
+        {
+            if (index < 0 || index >= size)
+            {
+                throw new IndexOutOfRangeException("Index is out of range.");
+            }
+
+            Node current = head;
+            for (int i = 0; i < index; i++)
+            {
+                current = current.Next;
+            }
+            return current.Value;
+        }
+
+        public int IndexOf(User value)
+        {
+            Node current = head;
+            for (int i = 0; i < size; i++)
+            {
+                if (current.Value.Equals(value))
+                {
+                    return i;
+                }
+                current = current.Next;
+            }
+            return -1;
+        }
+
+        public bool Contains(User value)
+        {
+            return IndexOf(value) != -1;
+        }
+
+
+        public void Reverse()
+        {
+            if (IsEmpty() || head.Next == null)
+            {
+                return;
+            }
+
+            Node prev = null;
+            Node current = head;
+            Node next = null;
+
+            while (current != null)
+            {
+                next = current.Next;
+                current.Next = prev;
+                prev = current;
+                current = next;
+            }
+
+            head = prev;
+        }
+
+
+        public void Serialize(string filePath)
+        {
+            try
+            {
+                using (FileStream fs = new FileStream(filePath, FileMode.Create))
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
+                    formatter.Serialize(fs, this);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Serialization failed: {ex.Message}");
+            }
+        }
+        public static SLL Deserialize(string filePath)
+        {
+            try
+            {
+                using (FileStream fs = new FileStream(filePath, FileMode.Open))
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
+                    return (SLL)formatter.Deserialize(fs);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Deserialization failed: {ex.Message}");
+                return null;
+            }
+        }
     }
 }

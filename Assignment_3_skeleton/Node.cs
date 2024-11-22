@@ -1,29 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Assignment_3_skeleton
+namespace Assignment3.Utility
 {
-	public class Node
-	{
-		//field
-		object element;
-		Node successor;
-		//setter and getter
-		public object Element { get => element; set => element = value; }
-		public Node Successor { get => successor; set => successor = value; }
-		//constructor with one parameter
-		public Node(object o)
-		{
-			Element = o;
-		}
-		//constructor with two parameters
-		public Node(object o, Node n)
-		{
-			Element = o;
-			Successor = n;
-		}
-	}
+    [DataContract]
+    public class Node
+    {
+        [DataMember]
+        public User Value { get; set; }
+        [DataMember]
+        public Node Next { get; set; }
+
+        public Node(User value)
+        {
+            Value = value;
+            Next = null;
+        }
+    }
 }
