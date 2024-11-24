@@ -4,12 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Assignment_3_skeleton
+namespace Assignment3
 {
     internal class Program
     {
-        static void Main(string[] args)
-        {
-        }
+        public static void Main(string[] args) { }
     }
 }
